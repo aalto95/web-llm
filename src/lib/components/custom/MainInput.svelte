@@ -16,13 +16,14 @@
   let isQuerying = false;
   let progressText = "";
 
-  async function initLLM(): Promise<void> {
+  const options = [{ value: "Qwen2-0.5B-Instruct-q0f32-MLC" }];
+
+  async function initLLM(model: string): Promise<void> {
     const initProgressCallback = (initProgress: InitProgressReport) => {
       progressText = initProgress.text;
     };
-    const selectedModel = "Qwen2-0.5B-Instruct-q0f32-MLC";
 
-    engine = await inference.CreateMLCEngine(selectedModel, {
+    engine = await inference.CreateMLCEngine(model, {
       initProgressCallback: initProgressCallback,
     });
 
@@ -49,14 +50,21 @@
     ];
   }
 
-  onMount(() => {
-    initLLM().then(() => {
+  function selectModel(e: Event) {
+    const model = (e.target as HTMLSelectElement).value;
+    initLLM(model).then(() => {
       isInitializing = false;
     });
-  });
+  }
 </script>
 
-<div class="w-full flex flex-col h-full mt-32">
+<div class="w-full flex flex-col h-full mt-20">
+  <select class="mb-4" on:change={selectModel}>
+    <option disabled selected value> -- Select LLM -- </option>
+    {#each options as option}
+      <option value={option.value}>{option.value}</option>
+    {/each}
+  </select>
   {#if !isInitializing}
     <h1 class="text-2xl lg:text-3xl xl:text-4xl text-center mb-8">
       Make your query
