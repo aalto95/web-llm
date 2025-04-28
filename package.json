@@ -23,7 +23,6 @@
     "typescript": "^5.5.3",
     "vite": "^5.4.1"
   },
-  "packageManager": "yarn@4.4.1",
   "dependencies": {
     "bits-ui": "^0.21.13",
     "clsx": "^2.1.1",
