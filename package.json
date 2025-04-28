@@ -12,7 +12,6 @@
   "dependencies": {
     "@mlc-ai/web-llm": "^0.2.78",
     "clsx": "^2.1.1",
-    "lucide-svelte": "^0.503.0",
     "mode-watcher": "^0.5.1",
     "tailwind-merge": "^3.2.0",
     "tailwind-variants": "^1.0.0"
@@ -23,6 +22,7 @@
     "@tsconfig/svelte": "^5.0.4",
     "@types/node": "^22.15.3",
     "bits-ui": "^0.22.0",
+    "lucide-svelte": "^0.503.0",
     "postcss": "^8.5.3",
     "sass": "^1.87.0",
     "svelte": "^5.28.2",

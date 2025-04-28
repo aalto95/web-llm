@@ -5,7 +5,7 @@
 </script>
 
 <header
-  class="dark:bg-background bg-indigo-50 flex py-2 px-8 border-b-[1px] justify-between items-center w-full fixed"
+  class="dark:bg-background bg-indigo-50 flex py-2 px-4 border-b-[1px] justify-between items-center w-full fixed"
 >
   <Sparkles />
 

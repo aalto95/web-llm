@@ -4,7 +4,9 @@
   import Label from "$lib/components/ui/label/label.svelte";
 </script>
 
-<div class="w-full px-4 h-dvh flex flex-col justify-center items-center">
+<div
+  class="w-full px-4 h-dvh flex flex-col justify-center items-center pt-20 box-border"
+>
   <!-- <div class="grid w-full max-w-sm items-center gap-1.5 mb-8">
     <Label for="model">Model</Label>
     <Input id="model" type="file" />
