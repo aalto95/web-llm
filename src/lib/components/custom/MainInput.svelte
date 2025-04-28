@@ -7,6 +7,8 @@
   import Button from "../ui/button/button.svelte";
   import Input from "../ui/input/input.svelte";
   import { inference } from "$lib/inference";
+  import * as Select from "$lib/components/ui/select";
+  import type { Selected } from "bits-ui";
 
   let engine: inference.MLCEngine;
   let reply: inference.ChatCompletion;
@@ -49,25 +51,32 @@
     ];
   }
 
-  function selectModel(e: Event) {
-    const model = (e.target as HTMLSelectElement).value;
-    initLLM(model)
-      .then(() => {
-        isInitializing = false;
-      })
-      .catch((error) => {
-        alert(error);
-      });
+  function selectModel(e: Selected<string | undefined> | undefined): void {
+    if (e && e.value) {
+      const model = e.value;
+      initLLM(model)
+        .then(() => {
+          isInitializing = false;
+        })
+        .catch((error) => {
+          alert(error);
+        });
+    }
   }
 </script>
 
-<div class="w-full flex flex-col h-full mt-20">
-  <select class="mb-4" on:change={selectModel}>
-    <option disabled selected value> -- Select LLM -- </option>
-    {#each options as option}
-      <option value={option.value}>{option.value}</option>
-    {/each}
-  </select>
+<div class="w-full flex flex-col h-full gap-4">
+  <Select.Root onSelectedChange={selectModel}>
+    <Select.Trigger class="w-full">
+      <Select.Value placeholder="Select LLM" />
+    </Select.Trigger>
+    <Select.Content>
+      {#each options as option}
+        <Select.Item value={option.value}>{option.value}</Select.Item>
+      {/each}
+    </Select.Content>
+  </Select.Root>
+
   {#if !isInitializing}
     <span class="flex gap-4">
       <Input
@@ -76,14 +85,15 @@
         bind:value={query}
         bind:disabled={isQuerying}
       />
-      <Button class="h-12" bind:disabled={isQuerying} on:click={makeQuery}
-        >Submit</Button
-      >
+
+      <Button class="h-12" bind:disabled={isQuerying} on:click={makeQuery}>
+        Submit
+      </Button>
     </span>
 
     {#if reply}
       <div
-        class="dark:bg-background bg-indigo-50 flex py-2 px-8 border-b-[1px] justify-between items-center w-full rounded-2xl mt-8"
+        class="dark:bg-background bg-white flex p-2 border-b-[1px] justify-between items-center w-full rounded-2xl"
       >
         {#each reply?.choices as replyChoice}
           <p>{replyChoice.message.content}</p>
