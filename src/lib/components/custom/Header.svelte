@@ -1,7 +1,5 @@
 <script lang="ts">
-  import Sun from "lucide-svelte/icons/sun";
-  import Sparkles from "lucide-svelte/icons/sparkles";
-  import Moon from "lucide-svelte/icons/moon";
+  import { Moon, Sparkles, Sun } from "lucide-svelte";
   import Button from "../ui/button/button.svelte";
   import { toggleMode } from "mode-watcher";
 </script>

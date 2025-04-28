@@ -1,6 +1,7 @@
 {
   "name": "Web LLM",
   "short_name": "Web LLM",
+  "description": "Web application capable of launching LLMs in-browser through local inference",
   "theme_color": "#000",
   "background_color": "#fff",
   "display": "standalone",

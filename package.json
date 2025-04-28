@@ -27,7 +27,7 @@
     "@mlc-ai/web-llm": "^0.2.78",
     "bits-ui": "^0.21.13",
     "clsx": "^2.1.1",
-    "lucide-svelte": "^0.439.0",
+    "lucide-svelte": "^0.503.0",
     "mode-watcher": "^0.4.1",
     "tailwind-merge": "^2.5.2",
     "tailwind-variants": "^0.2.1"
