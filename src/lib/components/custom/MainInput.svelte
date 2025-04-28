@@ -6,7 +6,6 @@
   } from "@mlc-ai/web-llm";
   import Button from "../ui/button/button.svelte";
   import Input from "../ui/input/input.svelte";
-  import { onMount } from "svelte";
   import { inference } from "$lib/inference";
 
   let engine: inference.MLCEngine;
@@ -52,9 +51,13 @@
 
   function selectModel(e: Event) {
     const model = (e.target as HTMLSelectElement).value;
-    initLLM(model).then(() => {
-      isInitializing = false;
-    });
+    initLLM(model)
+      .then(() => {
+        isInitializing = false;
+      })
+      .catch((error) => {
+        alert(error);
+      });
   }
 </script>
 
@@ -66,9 +69,6 @@
     {/each}
   </select>
   {#if !isInitializing}
-    <h1 class="text-2xl lg:text-3xl xl:text-4xl text-center mb-8">
-      Make your query
-    </h1>
     <span class="flex gap-4">
       <Input
         class="w-full h-12 text-lg xl:text-xl"
