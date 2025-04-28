@@ -7,5 +7,5 @@
 <main class="dark:bg-gray-900 bg-indigo-50 w-screen h-dvh overflow-x-hidden">
   <Header />
   <Main />
-  <ModeWatcher />
+  <ModeWatcher themeColors={{ dark: "black", light: "white" }} />
 </main>
