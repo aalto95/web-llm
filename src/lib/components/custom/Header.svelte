@@ -2,15 +2,12 @@
   import { Moon, Sparkles, Sun } from "lucide-svelte";
   import Button from "../ui/button/button.svelte";
   import { toggleMode } from "mode-watcher";
-  import { Link } from "svelte-routing";
 </script>
 
 <header
   class="dark:bg-background bg-indigo-50 flex py-2 px-8 border-b-[1px] justify-between items-center w-full fixed"
 >
-  <!-- <Link to="/">
-    <Sparkles />
-  </Link> -->
+  <Sparkles />
 
   <Button on:click={toggleMode} variant="outline" size="icon">
     <Sun
