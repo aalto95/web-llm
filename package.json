@@ -6,7 +6,13 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "npm run lint:scripts && npm run lint:styles",
+    "lint:fix": "npm run lint:scripts:fix && npm run lint:styles:fix",
+    "lint:scripts": "eslint ./src/**/*.{js,ts,vue}",
+    "lint:scripts:fix": "eslint ./src/**/*.{js,ts,vue} --fix",
+    "lint:styles": "stylelint ./src/**/*.{css,scss,vue}",
+    "lint:styles:fix": "stylelint ./src/**/*.{css,scss,vue} --fix"
   },
   "dependencies": {
     "@mlc-ai/web-llm": "^0.2.78",
@@ -23,6 +29,7 @@
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@config-federation/vue": "^0.1.2",
     "@types/node": "^22.15.3",
     "@vitejs/plugin-vue": "^5.2.2",
     "@vue/tsconfig": "^0.7.0",
