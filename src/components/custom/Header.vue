@@ -1,40 +1,59 @@
 <script setup lang="ts">
-import { Moon, Sparkles, Sun } from "lucide-vue-next";
-import { Button } from "@/components/ui/button";
-import { onMounted, ref } from "vue";
+import { Button } from '@/components/ui/button';
+import { Moon, SidebarOpenIcon, Sparkles, Sun } from 'lucide-vue-next';
+import { onMounted, ref } from 'vue';
+import { RouterLink } from 'vue-router';
+import { useSidebar } from '../ui/sidebar';
 
 const isDarkMode = ref(true);
+const {
+  state,
+  open,
+  setOpen,
+  openMobile,
+  setOpenMobile,
+  isMobile,
+  toggleSidebar
+} = useSidebar();
 
-function toggleTheme() {
+function toggleTheme(): void {
   isDarkMode.value = !isDarkMode.value;
 
   // Update the HTML class based on the new state
   if (isDarkMode.value) {
-    document.documentElement.classList.add("dark");
-    localStorage.setItem("theme", "dark"); // Save the preference
+    document.documentElement.classList.add('dark');
+    localStorage.setItem('theme', 'dark'); // Save the preference
   } else {
-    document.documentElement.classList.remove("dark");
-    localStorage.setItem("theme", "light"); // Save the preference
+    document.documentElement.classList.remove('dark');
+    localStorage.setItem('theme', 'light'); // Save the preference
   }
 }
 
 onMounted(() => {
-  const savedTheme = localStorage.getItem("theme");
-  if (savedTheme === "dark") {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
     isDarkMode.value = true;
-    document.documentElement.classList.add("dark");
+    document.documentElement.classList.add('dark');
   } else {
     isDarkMode.value = false;
-    document.documentElement.classList.remove("dark");
+    document.documentElement.classList.remove('dark');
   }
 });
 </script>
 
 <template>
   <header
-    class="dark:bg-background bg-indigo-50 flex py-2 px-4 border-b-[1px] justify-between items-center w-full fixed"
+    class="dark:bg-background flex py-2 px-4 border-b-[1px] justify-between items-center w-full fixed"
   >
-    <Sparkles />
+    <span class="flex items-center gap-4">
+      <Button variant="outline" size="icon" @click="toggleSidebar">
+        <SidebarOpenIcon></SidebarOpenIcon>
+      </Button>
+      <RouterLink to="/">
+        <Sparkles />
+      </RouterLink>
+    </span>
+
     <Button @click="toggleTheme" variant="outline" size="icon">
       <Sun
         class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
