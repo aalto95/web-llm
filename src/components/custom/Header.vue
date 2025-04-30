@@ -6,15 +6,7 @@ import { RouterLink } from 'vue-router';
 import { useSidebar } from '../ui/sidebar';
 
 const isDarkMode = ref(true);
-const {
-  state,
-  open,
-  setOpen,
-  openMobile,
-  setOpenMobile,
-  isMobile,
-  toggleSidebar
-} = useSidebar();
+const { toggleSidebar } = useSidebar();
 
 function toggleTheme(): void {
   isDarkMode.value = !isDarkMode.value;
