@@ -36,7 +36,9 @@ const initLLM = async (model: string): Promise<void> => {
 };
 
 const makeQuery = async (): Promise<void> => {
-  if (!engine) return;
+  if (!engine) {
+    return;
+  }
 
   isQuerying.value = true;
   reply.value = await engine.chat.completions.create({
@@ -51,7 +53,7 @@ const generateMessages = (
 ): (
   | inference.ChatCompletionSystemMessageParam
   | inference.ChatCompletionUserMessageParam
-)[] => {
+  )[] => {
   return [
     { role: "system", content: "You are a helpful AI assistant." },
     { role: "user", content: text },
