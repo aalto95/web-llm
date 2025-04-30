@@ -11,6 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+type ChatParameter =
+  | inference.ChatCompletionSystemMessageParam
+  | inference.ChatCompletionUserMessageParam;
+
 const options = [{ value: "Qwen2-0.5B-Instruct-q0f32-MLC" }];
 
 let engine: inference.MLCEngine | null = null;
@@ -48,12 +52,7 @@ const makeQuery = async (): Promise<void> => {
   isQuerying.value = false;
 };
 
-const generateMessages = (
-  text: string
-): (
-  | inference.ChatCompletionSystemMessageParam
-  | inference.ChatCompletionUserMessageParam
-  )[] => {
+const generateMessages = (text: string): ChatParameter[] => {
   return [
     { role: "system", content: "You are a helpful AI assistant." },
     { role: "user", content: text },
@@ -99,7 +98,7 @@ onMounted(() => {
     <template v-if="!isInitializing">
       <span class="flex gap-4">
         <Input
-          class="w-full h-12 text-lg xl:text-xl"
+          class="w-full h-12"
           placeholder="Ask away..."
           v-model="query"
           :disabled="isQuerying"
