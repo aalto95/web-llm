@@ -1,11 +1,19 @@
-import Main from "@/pages/Main.vue";
-import { createMemoryHistory, createRouter } from "vue-router";
+import NotFound from '@/pages/NotFound.vue';
+import { createRouter, createWebHistory } from 'vue-router';
 
-const routes = [{ path: "/", component: Main }];
+const routes = [
+  { path: '/', name: 'Main', component: () => import('@/pages/Main.vue') },
+  {
+    path: '/chats/:id',
+    name: 'Chat',
+    component: () => import('@/pages/Chat.vue')
+  },
+  { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound }
+];
 
 const router = createRouter({
-  history: createMemoryHistory(),
-  routes,
+  history: createWebHistory(),
+  routes
 });
 
 export default router;
