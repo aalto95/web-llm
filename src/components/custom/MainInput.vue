@@ -9,22 +9,26 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { inference } from '@/inference';
+import { useChatsStore } from '@/stores';
 import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 type ChatParameter =
+  | inference.ChatCompletionAssistantMessageParam
   | inference.ChatCompletionSystemMessageParam
   | inference.ChatCompletionUserMessageParam;
 
 const options = [{ value: 'Qwen2-0.5B-Instruct-q0f32-MLC' }];
+const chatsStore = useChatsStore();
+const route = useRoute();
+const router = useRouter();
+const id = route.params.id;
+const model = ref('');
 
 let engine: inference.MLCEngine | null = null;
 
-const router = useRouter();
-
 const isInitializing = ref<boolean>(true);
 const isQuerying = ref<boolean>(false);
-const reply = ref<inference.ChatCompletion | null>(null);
 const query = ref<string>('');
 const progressText = ref<string>('');
 
@@ -44,24 +48,40 @@ const makeQuery = async (): Promise<void> => {
   }
 
   isQuerying.value = true;
-  reply.value = await engine.chat.completions.create({
-    messages: generateMessages(query.value)
-  });
 
-  query.value = '';
-  isQuerying.value = false;
+  if (!id) {
+    chatsStore.createChat(model.value, {
+      role: 'user',
+      content: query.value
+    });
+  } else {
+    chatsStore.addMessageToChat(id as string, {
+      role: 'user',
+      content: query.value
+    });
+  }
 
-  router.push({ path: '/chats/' + self.crypto.randomUUID() });
-};
+  engine.chat.completions
+    .create({
+      messages: [{ role: 'user', content: query.value }]
+    })
+    .then((reply) => {
+      chatsStore.addMessageToChat(id as string, {
+        role: reply.choices[0].message.role,
+        content: reply.choices[0].message.content as string
+      });
 
-const generateMessages = (text: string): ChatParameter[] => {
-  return [{ role: 'user', content: text }];
+      query.value = '';
+      isQuerying.value = false;
+
+      window.scrollTo(0, document.body.scrollHeight);
+    });
 };
 
 const selectModel = (e: string): void => {
   if (e) {
-    const model = e;
-    initLLM(model)
+    model.value = e;
+    initLLM(model.value)
       .then(() => {
         isInitializing.value = false;
       })
@@ -73,13 +93,26 @@ const selectModel = (e: string): void => {
 };
 
 onMounted(() => {
-  // Optionally trigger initialization here if needed
+  if (id) {
+    chatsStore.currentChatId = id as string;
+    const currentChat = chatsStore.currentChat;
+    if (currentChat) {
+      model.value = currentChat.model;
+      selectModel(model.value);
+    }
+  } else {
+    chatsStore.currentChatId = '';
+  }
 });
 </script>
 
 <template>
-  <div class="w-full flex flex-col h-full gap-4">
-    <Select @update:model-value="(e) => selectModel(e as string)">
+  <div class="w-full flex flex-col h-full gap-4 text-left">
+    <Select
+      :model-value="model"
+      :disabled="!!model"
+      @update:model-value="(e) => selectModel(e as string)"
+    >
       <SelectTrigger class="w-full">
         <SelectValue placeholder="Select LLM" />
       </SelectTrigger>
@@ -108,14 +141,24 @@ onMounted(() => {
         </Button>
       </span>
 
-      <div
-        v-if="reply"
-        class="dark:bg-background bg-indigo-50 flex p-2 justify-between items-center w-full rounded-2xl"
+      <template
+        v-for="(reply, index) in chatsStore.currentChat?.messages"
+        :key="index"
       >
-        <p v-for="replyChoice in reply.choices" :key="replyChoice.index">
-          {{ replyChoice.message.content }}
-        </p>
-      </div>
+        <div
+          v-if="reply.role === 'user'"
+          class="dark:bg-indigo-950 bg-indigo-50 p-4 rounded-2xl w-fit self-end"
+        >
+          {{ reply.content }}
+        </div>
+
+        <div
+          v-if="reply.role === 'assistant'"
+          class="dark:bg-gray-900 bg-gray-50 p-4 rounded-2xl w-fit"
+        >
+          {{ reply.content }}
+        </div>
+      </template>
     </template>
     <template v-else>
       {{ progressText }}
