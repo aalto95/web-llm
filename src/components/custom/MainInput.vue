@@ -13,16 +13,11 @@ import { useChatsStore } from '@/stores';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-type ChatParameter =
-  | inference.ChatCompletionAssistantMessageParam
-  | inference.ChatCompletionSystemMessageParam
-  | inference.ChatCompletionUserMessageParam;
-
 const options = [{ value: 'Qwen2-0.5B-Instruct-q0f32-MLC' }];
 const chatsStore = useChatsStore();
 const route = useRoute();
 const router = useRouter();
-const id = route.params.id;
+const id = route.params.id as string;
 const model = ref('');
 
 let engine: inference.MLCEngine | null = null;
@@ -47,35 +42,46 @@ const makeQuery = async (): Promise<void> => {
     return;
   }
 
+  const newChatUUID = self.crypto.randomUUID();
   isQuerying.value = true;
 
+  const userMessage = {
+    role: 'user' as const,
+    content: query.value
+  };
+
+  // Save user message
   if (!id) {
-    chatsStore.createChat(model.value, {
-      role: 'user',
-      content: query.value
-    });
+    chatsStore.createChat(model.value, userMessage, newChatUUID);
   } else {
-    chatsStore.addMessageToChat(id as string, {
-      role: 'user',
-      content: query.value
-    });
+    chatsStore.addMessageToChat(id, userMessage);
   }
 
-  engine.chat.completions
-    .create({
-      messages: [{ role: 'user', content: query.value }]
-    })
-    .then((reply) => {
-      chatsStore.addMessageToChat(id as string, {
-        role: reply.choices[0].message.role,
-        content: reply.choices[0].message.content as string
-      });
-
-      query.value = '';
-      isQuerying.value = false;
-
-      window.scrollTo(0, document.body.scrollHeight);
+  try {
+    const reply = await engine.chat.completions.create({
+      messages: [userMessage]
     });
+
+    const aiMessage = {
+      role: reply.choices[0].message.role,
+      content: reply.choices[0].message.content ?? 'No response'
+    };
+
+    // Save AI message
+    if (!id) {
+      chatsStore.addMessageToChat(newChatUUID, aiMessage);
+      router.push('/chats/' + newChatUUID);
+    } else {
+      chatsStore.addMessageToChat(id, aiMessage);
+    }
+
+    // Reset UI state
+    query.value = '';
+  } catch (error) {
+    console.error('Error fetching completion:', error);
+  } finally {
+    isQuerying.value = false;
+  }
 };
 
 const selectModel = (e: string): void => {
