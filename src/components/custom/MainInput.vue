@@ -1,29 +1,32 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { inference } from "@/inference";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+  SelectValue
+} from '@/components/ui/select';
+import { inference } from '@/inference';
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 type ChatParameter =
   | inference.ChatCompletionSystemMessageParam
   | inference.ChatCompletionUserMessageParam;
 
-const options = [{ value: "Qwen2-0.5B-Instruct-q0f32-MLC" }];
+const options = [{ value: 'Qwen2-0.5B-Instruct-q0f32-MLC' }];
 
 let engine: inference.MLCEngine | null = null;
+
+const router = useRouter();
 
 const isInitializing = ref<boolean>(true);
 const isQuerying = ref<boolean>(false);
 const reply = ref<inference.ChatCompletion | null>(null);
-const query = ref<string>("");
-const progressText = ref<string>("");
+const query = ref<string>('');
+const progressText = ref<string>('');
 
 const initLLM = async (model: string): Promise<void> => {
   const initProgressCallback = (initProgress: inference.InitProgressReport) => {
@@ -31,11 +34,7 @@ const initLLM = async (model: string): Promise<void> => {
   };
 
   engine = await inference.CreateMLCEngine(model, {
-    initProgressCallback,
-  });
-
-  reply.value = await engine.chat.completions.create({
-    messages: generateMessages("Hello!"),
+    initProgressCallback
   });
 };
 
@@ -46,17 +45,17 @@ const makeQuery = async (): Promise<void> => {
 
   isQuerying.value = true;
   reply.value = await engine.chat.completions.create({
-    messages: generateMessages(query.value),
+    messages: generateMessages(query.value)
   });
-  query.value = "";
+
+  query.value = '';
   isQuerying.value = false;
+
+  router.push({ path: '/chats/' + self.crypto.randomUUID() });
 };
 
 const generateMessages = (text: string): ChatParameter[] => {
-  return [
-    { role: "system", content: "You are a helpful AI assistant." },
-    { role: "user", content: text },
-  ];
+  return [{ role: 'user', content: text }];
 };
 
 const selectModel = (e: string): void => {

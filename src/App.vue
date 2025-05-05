@@ -6,7 +6,7 @@ import { RouterView } from 'vue-router';
 </script>
 
 <template>
-  <SidebarProvider>
+  <SidebarProvider :default-open="false">
     <Sidebar></Sidebar>
     <main class="w-screen h-dvh">
       <Header></Header>
