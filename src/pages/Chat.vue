@@ -1,9 +1,11 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import MainInput from '@/components/custom/MainInput.vue';
+</script>
 
 <template>
   <div
-    class="w-full px-4 h-dvh flex flex-col justify-center items-center pt-20 box-border"
+    class="w-full px-4 pb-4 min-h-dvh flex flex-col items-center pt-20 box-border"
   >
-    Chat
+    <MainInput></MainInput>
   </div>
 </template>

@@ -35,7 +35,7 @@ onMounted(() => {
 
 <template>
   <header
-    class="dark:bg-background flex py-2 px-4 border-b-[1px] justify-between items-center w-full fixed"
+    class="dark:bg-background bg-white z-10 flex py-2 px-4 border-b-[1px] justify-between items-center w-full fixed"
   >
     <span class="flex items-center gap-4">
       <Button variant="outline" size="icon" @click="toggleSidebar">

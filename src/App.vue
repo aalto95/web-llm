@@ -8,7 +8,7 @@ import { RouterView } from 'vue-router';
 <template>
   <SidebarProvider :default-open="false">
     <Sidebar></Sidebar>
-    <main class="w-screen h-dvh">
+    <main class="w-screen min-h-dvh">
       <Header></Header>
       <RouterView></RouterView>
     </main>
