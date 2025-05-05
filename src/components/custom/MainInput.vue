@@ -10,17 +10,18 @@ import {
 } from '@/components/ui/select';
 import { inference } from '@/inference';
 import { useChatsStore } from '@/stores';
-import { onMounted, ref } from 'vue';
+import { CreateWebWorkerMLCEngine } from '@mlc-ai/web-llm';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const options = [{ value: 'Qwen2-0.5B-Instruct-q0f32-MLC' }];
 const chatsStore = useChatsStore();
 const route = useRoute();
 const router = useRouter();
-const id = route.params.id as string;
+const id = computed(() => route.params.id);
 const model = ref('');
 
-let engine: inference.MLCEngine | null = null;
+let engine: inference.WebWorkerMLCEngine | null = null;
 
 const isInitializing = ref<boolean>(true);
 const isQuerying = ref<boolean>(false);
@@ -32,9 +33,11 @@ const initLLM = async (model: string): Promise<void> => {
     progressText.value = initProgress.text;
   };
 
-  engine = await inference.CreateMLCEngine(model, {
-    initProgressCallback
-  });
+  engine = await CreateWebWorkerMLCEngine(
+    new Worker(new URL('./worker.js', import.meta.url), { type: 'module' }),
+    model,
+    { initProgressCallback }
+  );
 };
 
 const makeQuery = async (): Promise<void> => {
@@ -51,10 +54,10 @@ const makeQuery = async (): Promise<void> => {
   };
 
   // Save user message
-  if (!id) {
+  if (!id.value) {
     chatsStore.createChat(model.value, userMessage, newChatUUID);
   } else {
-    chatsStore.addMessageToChat(id, userMessage);
+    chatsStore.addMessageToChat(id.value as string, userMessage);
   }
 
   try {
@@ -68,11 +71,11 @@ const makeQuery = async (): Promise<void> => {
     };
 
     // Save AI message
-    if (!id) {
+    if (!id.value) {
       chatsStore.addMessageToChat(newChatUUID, aiMessage);
       router.push('/chats/' + newChatUUID);
     } else {
-      chatsStore.addMessageToChat(id, aiMessage);
+      chatsStore.addMessageToChat(id.value as string, aiMessage);
     }
 
     // Reset UI state
@@ -99,8 +102,8 @@ const selectModel = (e: string): void => {
 };
 
 onMounted(() => {
-  if (id) {
-    chatsStore.currentChatId = id as string;
+  if (id.value) {
+    chatsStore.currentChatId = id.value as string;
     const currentChat = chatsStore.currentChat;
     if (currentChat) {
       model.value = currentChat.model;
