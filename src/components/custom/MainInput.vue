@@ -60,6 +60,15 @@ const initLLM = async (modelName: string): Promise<void> => {
   }
 };
 
+const scrollToBottom = () => {
+  setTimeout(() => {
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: 'smooth'
+    });
+  }, 50);
+};
+
 const makeQuery = async (): Promise<void> => {
   if (!engine || isQuerying.value) {
     return;
@@ -79,6 +88,8 @@ const makeQuery = async (): Promise<void> => {
       chatsStore.addMessageToChat(chatId, userMessage);
     }
 
+    scrollToBottom();
+
     // Get AI response
     const reply = await engine.chat.completions.create({
       messages: [userMessage]
@@ -94,6 +105,7 @@ const makeQuery = async (): Promise<void> => {
 
     // Reset UI
     query.value = '';
+    scrollToBottom();
   } catch (error) {
     console.error('Error during completion:', error);
   } finally {
@@ -144,7 +156,9 @@ const selectModel = (selectedModel: string): void => {
     <!-- Chat UI -->
     <template v-else>
       <!-- Input Section -->
-      <div class="flex gap-4">
+      <div
+        class="flex gap-4 fixed left-0 w-full p-4 dark:bg-background border-t-1 bg-white box-border bottom-0"
+      >
         <Input
           v-model="query"
           class="w-full h-12"
