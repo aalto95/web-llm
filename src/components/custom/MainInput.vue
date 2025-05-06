@@ -11,6 +11,7 @@ import {
 import { inference } from '@/inference';
 import { useChatsStore } from '@/stores';
 import { CreateMLCEngine } from '@mlc-ai/web-llm';
+import { LucideArrowUp, LucideStopCircle } from 'lucide-vue-next';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -111,6 +112,16 @@ const makeQuery = async (): Promise<void> => {
   }
 };
 
+const stopQuery = async (): Promise<void> => {
+  if (!engine) {
+    return;
+  }
+
+  await engine.interruptGenerate().then(() => {
+    isQuerying.value = false;
+  });
+};
+
 const selectModel = (selectedModel: string): void => {
   if (!selectedModel) {
     return;
@@ -164,10 +175,14 @@ const selectModel = (selectedModel: string): void => {
           class="w-full h-12"
           placeholder="Ask away..."
           :disabled="isQuerying"
+          @keyup.enter="makeQuery"
         />
-        <Button class="h-12" :disabled="isQuerying" @click="makeQuery"
-          >Submit</Button
-        >
+        <Button v-if="!isQuerying" class="h-12 w-12" @click="makeQuery">
+          <LucideArrowUp></LucideArrowUp>
+        </Button>
+        <Button v-else class="h-12 w-12" @click="stopQuery">
+          <LucideStopCircle></LucideStopCircle>
+        </Button>
       </div>
 
       <!-- Chat Messages -->
