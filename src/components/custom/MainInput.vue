@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/select';
 import { inference } from '@/inference';
 import { useChatsStore } from '@/stores';
-import { CreateWebWorkerMLCEngine } from '@mlc-ai/web-llm';
+import { CreateMLCEngine } from '@mlc-ai/web-llm';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -29,7 +29,7 @@ const id = computed(() => route.params.id);
 
 // === MODEL OPTIONS ===
 const options = [{ value: 'Qwen2-0.5B-Instruct-q0f32-MLC' }];
-let engine: inference.WebWorkerMLCEngine | null = null;
+let engine: inference.MLCEngine | null = null;
 
 // === LIFECYCLE ===
 onMounted(() => {
@@ -47,11 +47,9 @@ const initLLM = async (modelName: string): Promise<void> => {
       progressText.value = report.text;
     };
 
-    engine = await CreateWebWorkerMLCEngine(
-      new Worker(new URL('./worker.js', import.meta.url), { type: 'module' }),
-      modelName,
-      { initProgressCallback }
-    );
+    engine = await CreateMLCEngine(modelName, {
+      initProgressCallback
+    });
 
     isInitializing.value = false;
   } catch (error) {
