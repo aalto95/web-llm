@@ -21,6 +21,7 @@ const query = ref('');
 const isInitializing = ref(true);
 const isQuerying = ref(false);
 const progressText = ref('');
+const chatBox = ref<HTMLDivElement | null>(null);
 
 // === STORES & ROUTING ===
 const chatsStore = useChatsStore();
@@ -53,6 +54,7 @@ const initLLM = async (modelName: string): Promise<void> => {
     });
 
     isInitializing.value = false;
+    scrollToBottom();
   } catch (error) {
     console.error('Failed to initialize LLM:', error);
     alert('Failed to load model');
@@ -61,10 +63,10 @@ const initLLM = async (modelName: string): Promise<void> => {
 
 const scrollToBottom = () => {
   setTimeout(() => {
-    window.scrollTo({
-      top: document.body.scrollHeight,
-      behavior: 'smooth'
-    });
+    if (chatBox.value) {
+      const container = chatBox.value;
+      container.scrollTop = container.scrollHeight;
+    }
   }, 50);
 };
 
@@ -136,28 +138,28 @@ const selectModel = (selectedModel: string): void => {
 </script>
 
 <template>
-  <div
-    class="w-full flex flex-col h-full gap-4 text-left relative p-4 pt-20 pb-24"
-  >
+  <div class="w-full flex flex-col h-dvh gap-4 text-left relative pt-20 pb-32">
     <!-- Model Selector -->
-    <Select
-      :model-value="model"
-      :disabled="!!model"
-      @update:model-value="(e) => selectModel(e as string)"
-    >
-      <SelectTrigger class="w-full">
-        <SelectValue placeholder="Select LLM" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem
-          v-for="option in options"
-          :key="option.value"
-          :value="option.value"
-        >
-          {{ option.value }}
-        </SelectItem>
-      </SelectContent>
-    </Select>
+    <div class="w-full px-4">
+      <Select
+        :model-value="model"
+        :disabled="!!model"
+        @update:model-value="(e) => selectModel(e as string)"
+      >
+        <SelectTrigger class="w-full">
+          <SelectValue placeholder="Select LLM" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem
+            v-for="option in options"
+            :key="option.value"
+            :value="option.value"
+          >
+            {{ option.value }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
 
     <!-- Loading State -->
     <div v-if="isInitializing" class="text-center py-4">
@@ -168,27 +170,33 @@ const selectModel = (selectedModel: string): void => {
     <template v-else>
       <!-- Input Section -->
       <div
-        class="flex gap-4 fixed left-0 w-full p-4 dark:bg-background border-t-1 bg-white box-border bottom-0 z-10"
+        class="flex flex-col gap-2 absolute left-0 w-full p-4 dark:bg-background border-t-1 bg-white box-border bottom-0"
       >
-        <Input
-          v-model="query"
-          class="w-full h-12"
-          placeholder="Ask away..."
-          :disabled="isQuerying"
-          @keyup.enter="makeQuery"
-        />
-        <Button v-if="!isQuerying" class="h-12 w-12" @click="makeQuery">
-          <LucideArrowUp></LucideArrowUp>
-        </Button>
-        <Button v-else class="h-12 w-12" @click="stopQuery">
-          <LucideStopCircle></LucideStopCircle>
-        </Button>
+        <span class="flex gap-4">
+          <Input
+            v-model="query"
+            class="w-full h-12 text-sm"
+            placeholder="How can I help you today?"
+            :disabled="isQuerying"
+            @keyup.enter="makeQuery"
+          />
+          <Button v-if="!isQuerying" class="h-12 w-12" @click="makeQuery">
+            <LucideArrowUp></LucideArrowUp>
+          </Button>
+          <Button v-else class="h-12 w-12" @click="stopQuery">
+            <LucideStopCircle></LucideStopCircle>
+          </Button>
+        </span>
+        <p class="text-center text-xs">
+          AI-generated content may not be accurate.
+        </p>
       </div>
 
       <!-- Chat Messages -->
       <div
         v-if="chatsStore.currentChat?.messages.length"
-        class="space-y-4 overflow-auto"
+        class="space-y-4 overflow-auto px-4 scroll-smooth scrollbar-thin scrollbar-track-background scrollbar-thumb-accent-foreground"
+        ref="chatBox"
       >
         <div
           v-for="(message, index) in chatsStore.currentChat.messages"

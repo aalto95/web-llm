@@ -32,7 +32,7 @@ function deleteChat(chatId: string) {
 </script>
 
 <template>
-  <Sidebar>
+  <Sidebar variant="sidebar">
     <SidebarContent>
       <SidebarGroup>
         <SidebarGroupLabel>Chats</SidebarGroupLabel>

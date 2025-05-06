@@ -2,6 +2,8 @@
 @import 'tw-animate-css';
 @import 'nprogress/nprogress.css';
 
+@plugin 'tailwind-scrollbar';
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
