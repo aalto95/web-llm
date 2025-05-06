@@ -14,53 +14,78 @@ import { CreateWebWorkerMLCEngine } from '@mlc-ai/web-llm';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-const options = [{ value: 'Qwen2-0.5B-Instruct-q0f32-MLC' }];
+// === STATE ===
+const model = ref('');
+const query = ref('');
+const isInitializing = ref(true);
+const isQuerying = ref(false);
+const progressText = ref('');
+
+// === STORES & ROUTING ===
 const chatsStore = useChatsStore();
 const route = useRoute();
 const router = useRouter();
 const id = computed(() => route.params.id);
-const model = ref('');
 
+// === MODEL OPTIONS ===
+const options = [{ value: 'Qwen2-0.5B-Instruct-q0f32-MLC' }];
 let engine: inference.WebWorkerMLCEngine | null = null;
 
-const isInitializing = ref<boolean>(true);
-const isQuerying = ref<boolean>(false);
-const query = ref<string>('');
-const progressText = ref<string>('');
+// === LIFECYCLE ===
+onMounted(() => {
+  if (id.value) {
+    const chatId = id.value as string;
+    chatsStore.currentChatId = chatId;
+    const currentChat = chatsStore.currentChat;
+    if (currentChat) {
+      model.value = currentChat.model;
+      selectModel(model.value);
+    }
+  } else {
+    chatsStore.currentChatId = '';
+  }
+});
 
-const initLLM = async (model: string): Promise<void> => {
-  const initProgressCallback = (initProgress: inference.InitProgressReport) => {
-    progressText.value = initProgress.text;
-  };
+// === FUNCTIONS ===
+const initLLM = async (modelName: string): Promise<void> => {
+  try {
+    const initProgressCallback = (report: inference.InitProgressReport) => {
+      progressText.value = report.text;
+    };
 
-  engine = await CreateWebWorkerMLCEngine(
-    new Worker(new URL('./worker.js', import.meta.url), { type: 'module' }),
-    model,
-    { initProgressCallback }
-  );
+    engine = await CreateWebWorkerMLCEngine(
+      new Worker(new URL('./worker.js', import.meta.url), { type: 'module' }),
+      modelName,
+      { initProgressCallback }
+    );
+
+    isInitializing.value = false;
+  } catch (error) {
+    console.error('Failed to initialize LLM:', error);
+    alert('Failed to load model');
+  }
 };
 
 const makeQuery = async (): Promise<void> => {
-  if (!engine) {
+  if (!engine || isQuerying.value) {
     return;
   }
 
-  const newChatUUID = self.crypto.randomUUID();
   isQuerying.value = true;
-
-  const userMessage = {
-    role: 'user' as const,
-    content: query.value
-  };
-
-  // Save user message
-  if (!id.value) {
-    chatsStore.createChat(model.value, userMessage, newChatUUID);
-  } else {
-    chatsStore.addMessageToChat(id.value as string, userMessage);
-  }
+  const userMessage = { role: 'user' as const, content: query.value };
+  const chatUUID = self.crypto.randomUUID();
 
   try {
+    // Save user message
+    const chatId = id.value ? (id.value as string) : chatUUID;
+    if (!id.value) {
+      chatsStore.createChat(model.value, userMessage, chatUUID);
+      router.push(`/chats/${chatUUID}`);
+    } else {
+      chatsStore.addMessageToChat(chatId, userMessage);
+    }
+
+    // Get AI response
     const reply = await engine.chat.completions.create({
       messages: [userMessage]
     });
@@ -71,52 +96,33 @@ const makeQuery = async (): Promise<void> => {
     };
 
     // Save AI message
-    if (!id.value) {
-      chatsStore.addMessageToChat(newChatUUID, aiMessage);
-      router.push('/chats/' + newChatUUID);
-    } else {
-      chatsStore.addMessageToChat(id.value as string, aiMessage);
-    }
+    chatsStore.addMessageToChat(chatId, aiMessage);
 
-    // Reset UI state
+    // Reset UI
     query.value = '';
   } catch (error) {
-    console.error('Error fetching completion:', error);
+    console.error('Error during completion:', error);
   } finally {
     isQuerying.value = false;
   }
 };
 
-const selectModel = (e: string): void => {
-  if (e) {
-    model.value = e;
-    initLLM(model.value)
-      .then(() => {
-        isInitializing.value = false;
-      })
-      .catch((error) => {
-        console.error(error);
-        alert(error);
-      });
+const selectModel = (selectedModel: string): void => {
+  if (!selectedModel) {
+    return;
   }
-};
 
-onMounted(() => {
-  if (id.value) {
-    chatsStore.currentChatId = id.value as string;
-    const currentChat = chatsStore.currentChat;
-    if (currentChat) {
-      model.value = currentChat.model;
-      selectModel(model.value);
-    }
-  } else {
-    chatsStore.currentChatId = '';
-  }
-});
+  model.value = selectedModel;
+  initLLM(selectedModel).catch((err) => {
+    console.error('Model selection failed:', err);
+    alert('Could not load the selected model.');
+  });
+};
 </script>
 
 <template>
   <div class="w-full flex flex-col h-full gap-4 text-left">
+    <!-- Model Selector -->
     <Select
       :model-value="model"
       :disabled="!!model"
@@ -136,41 +142,44 @@ onMounted(() => {
       </SelectContent>
     </Select>
 
-    <template v-if="!isInitializing">
-      <span class="flex gap-4">
+    <!-- Loading State -->
+    <div v-if="isInitializing" class="text-center py-4">
+      {{ progressText || 'Select model' }}
+    </div>
+
+    <!-- Chat UI -->
+    <template v-else>
+      <!-- Input Section -->
+      <div class="flex gap-4">
         <Input
+          v-model="query"
           class="w-full h-12"
           placeholder="Ask away..."
-          v-model="query"
           :disabled="isQuerying"
         />
+        <Button class="h-12" :disabled="isQuerying" @click="makeQuery"
+          >Submit</Button
+        >
+      </div>
 
-        <Button class="h-12" :disabled="isQuerying" @click="makeQuery">
-          Submit
-        </Button>
-      </span>
-
-      <template
-        v-for="(reply, index) in chatsStore.currentChat?.messages"
-        :key="index"
+      <!-- Chat Messages -->
+      <div
+        v-if="chatsStore.currentChat?.messages.length"
+        class="space-y-4 overflow-auto"
       >
         <div
-          v-if="reply.role === 'user'"
-          class="dark:bg-indigo-950 bg-indigo-50 p-4 rounded-2xl w-fit self-end"
+          v-for="(message, index) in chatsStore.currentChat.messages"
+          :key="index"
+          :class="[
+            'p-4 rounded-2xl w-fit max-w-[80%]',
+            message.role === 'user'
+              ? 'bg-indigo-50 dark:bg-indigo-950 self-end ml-auto'
+              : 'bg-gray-50 dark:bg-gray-900 self-start mr-auto'
+          ]"
         >
-          {{ reply.content }}
+          {{ message.content }}
         </div>
-
-        <div
-          v-if="reply.role === 'assistant'"
-          class="dark:bg-gray-900 bg-gray-50 p-4 rounded-2xl w-fit"
-        >
-          {{ reply.content }}
-        </div>
-      </template>
-    </template>
-    <template v-else>
-      {{ progressText }}
+      </div>
     </template>
   </div>
 </template>
