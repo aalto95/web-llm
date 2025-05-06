@@ -33,16 +33,10 @@ let engine: inference.WebWorkerMLCEngine | null = null;
 
 // === LIFECYCLE ===
 onMounted(() => {
-  if (id.value) {
-    const chatId = id.value as string;
-    chatsStore.currentChatId = chatId;
-    const currentChat = chatsStore.currentChat;
-    if (currentChat) {
-      model.value = currentChat.model;
-      selectModel(model.value);
-    }
-  } else {
-    chatsStore.currentChatId = '';
+  const currentChat = chatsStore.currentChat;
+  if (currentChat) {
+    model.value = currentChat.model;
+    selectModel(model.value);
   }
 });
 
