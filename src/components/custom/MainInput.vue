@@ -127,7 +127,9 @@ const selectModel = (selectedModel: string): void => {
 </script>
 
 <template>
-  <div class="w-full flex flex-col h-full gap-4 text-left">
+  <div
+    class="w-full flex flex-col h-full gap-4 text-left relative p-4 pt-20 pb-24"
+  >
     <!-- Model Selector -->
     <Select
       :model-value="model"
@@ -157,7 +159,7 @@ const selectModel = (selectedModel: string): void => {
     <template v-else>
       <!-- Input Section -->
       <div
-        class="flex gap-4 fixed left-0 w-full p-4 dark:bg-background border-t-1 bg-white box-border bottom-0"
+        class="flex gap-4 fixed left-0 w-full p-4 dark:bg-background border-t-1 bg-white box-border bottom-0 z-10"
       >
         <Input
           v-model="query"
