@@ -6,7 +6,6 @@ import { useRoute } from 'vue-router';
 
 export const useChatsStore = defineStore('chats', () => {
   const chats = ref<Chat[]>([]);
-  const currentChatId = ref<string>('');
   const route = useRoute();
 
   const currentChat = computed(() =>
@@ -24,6 +23,12 @@ export const useChatsStore = defineStore('chats', () => {
       id: uuid,
       messages: [message]
     });
+
+    localStorage.setItem('chats', JSON.stringify(chats.value));
+  }
+
+  function deleteChat(chatId: string) {
+    chats.value = chats.value.filter((chat) => chat.id !== chatId);
 
     localStorage.setItem('chats', JSON.stringify(chats.value));
   }
@@ -49,5 +54,11 @@ export const useChatsStore = defineStore('chats', () => {
     }
   });
 
-  return { chats, currentChatId, createChat, currentChat, addMessageToChat };
+  return {
+    chats,
+    currentChat,
+    createChat,
+    deleteChat,
+    addMessageToChat
+  };
 });
