@@ -6,7 +6,7 @@ const routes = [
   {
     path: '/chats/:id',
     name: 'Chat',
-    component: () => import('@/pages/Chat.vue')
+    component: () => import('@/pages/Main.vue')
   },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound }
 ];
