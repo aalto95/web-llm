@@ -1,8 +1,8 @@
-import type { ChatCompletionMessageParam } from '@mlc-ai/web-llm';
+import type { Message } from '@/types';
 
 export interface Chat {
   title: string;
   id: string;
   model: string;
-  messages: ChatCompletionMessageParam[];
+  messages: Message[];
 }
