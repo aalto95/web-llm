@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { formatDate } from '@/helpers';
 import { inference } from '@/inference';
 import { useChatsStore } from '@/stores';
 import { CreateMLCEngine } from '@mlc-ai/web-llm';
@@ -30,7 +31,11 @@ const router = useRouter();
 const id = computed(() => route.params.id);
 
 // === MODEL OPTIONS ===
-const options = [{ value: 'Qwen2-0.5B-Instruct-q0f32-MLC' }];
+const options = [
+  { value: 'Qwen2-0.5B-Instruct-q0f32-MLC' },
+  { value: 'Llama-3.2-1B-Instruct-q4f32_1-MLC' }
+];
+
 let engine: inference.MLCEngine | null = null;
 
 // === LIFECYCLE ===
@@ -198,18 +203,35 @@ const selectModel = (selectedModel: string): void => {
         class="space-y-4 overflow-auto px-4 scroll-smooth scrollbar-thin scrollbar-track-background scrollbar-thumb-accent-foreground"
         ref="chatBox"
       >
-        <div
+        <template
           v-for="(message, index) in chatsStore.currentChat.messages"
           :key="index"
-          :class="[
-            'p-4 rounded-2xl w-fit max-w-[80%]',
-            message.role === 'user'
-              ? 'bg-indigo-50 dark:bg-indigo-950 self-end ml-auto'
-              : 'bg-gray-50 dark:bg-gray-900 self-start mr-auto'
-          ]"
         >
-          {{ message.content }}
-        </div>
+          <span
+            class="flex gap-4 mb-2"
+            :class="{
+              'justify-end': message.role === 'user'
+            }"
+          >
+            <p v-if="message.role === 'assistant'">
+              {{ chatsStore.currentChat?.model }}
+            </p>
+            <p v-if="message?.createdOn">
+              {{ formatDate(message?.createdOn) }}
+            </p>
+          </span>
+
+          <div
+            :class="[
+              'p-4 rounded-2xl w-fit max-w-[80%]',
+              message.role === 'user'
+                ? 'bg-indigo-50 dark:bg-indigo-950 self-end ml-auto'
+                : 'bg-gray-50 dark:bg-gray-900 self-start mr-auto'
+            ]"
+          >
+            {{ message.content }}
+          </div>
+        </template>
       </div>
     </template>
   </div>
