@@ -21,7 +21,7 @@ export const useChatsStore = defineStore('chats', () => {
       title: message.content as string,
       model: model,
       id: uuid,
-      messages: [message]
+      messages: [{ ...message, createdOn: String(new Date()) }]
     });
 
     localStorage.setItem('chats', JSON.stringify(chats.value));
@@ -39,7 +39,13 @@ export const useChatsStore = defineStore('chats', () => {
   ) {
     chats.value = chats.value.map((chat) => {
       if (chat.id === chatId) {
-        return { ...chat, messages: [...chat.messages, message] };
+        return {
+          ...chat,
+          messages: [
+            ...chat.messages,
+            { ...message, createdOn: String(new Date()) }
+          ]
+        };
       }
       return chat;
     });
