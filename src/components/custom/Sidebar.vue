@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +18,7 @@ import {
   SidebarMenuItem
 } from '@/components/ui/sidebar';
 import { useChatsStore } from '@/stores';
-import { MoreHorizontal } from 'lucide-vue-next';
+import { MoreHorizontal, Plus } from 'lucide-vue-next';
 import { useRouter } from 'vue-router';
 
 const chatsStore = useChatsStore();
@@ -34,11 +35,20 @@ function deleteChat(chatId: string) {
 <template>
   <Sidebar variant="sidebar">
     <SidebarContent>
-      <SidebarGroup>
-        <SidebarGroupLabel>Chats</SidebarGroupLabel>
+      <RouterLink to="/" class="m-4">
+        <Button class="cursor-pointer w-full"><Plus />New chat</Button>
+      </RouterLink>
+      <SidebarGroup
+        v-for="modelOption in chatsStore.modelOptions"
+        :key="modelOption.value"
+      >
+        <SidebarGroupLabel>{{ modelOption.value }}</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
-            <SidebarMenuItem v-for="chat in chatsStore.chats" :key="chat.title">
+            <SidebarMenuItem
+              v-for="chat in chatsStore.getChatsOfModel(modelOption.value)"
+              :key="chat.title"
+            >
               <SidebarMenuButton asChild>
                 <RouterLink :to="'/chats/' + chat.id">
                   <span>{{ chat.title }}</span>
