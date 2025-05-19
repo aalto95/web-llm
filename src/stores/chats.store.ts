@@ -5,12 +5,22 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 export const useChatsStore = defineStore('chats', () => {
-  const chats = ref<Chat[]>([]);
   const route = useRoute();
+
+  const chats = ref<Chat[]>([]);
+
+  const modelOptions = ref([
+    { value: 'Qwen2-0.5B-Instruct-q0f32-MLC' },
+    { value: 'Llama-3.2-1B-Instruct-q4f32_1-MLC' }
+  ]);
 
   const currentChat = computed(() =>
     chats.value.find((chat) => chat.id === route.params.id)
   );
+
+  function getChatsOfModel(model: string) {
+    return chats.value.filter((chat) => chat.model === model);
+  }
 
   function createChat(
     model: string,
@@ -62,8 +72,10 @@ export const useChatsStore = defineStore('chats', () => {
 
   return {
     chats,
+    modelOptions,
     currentChat,
     createChat,
+    getChatsOfModel,
     deleteChat,
     addMessageToChat
   };
