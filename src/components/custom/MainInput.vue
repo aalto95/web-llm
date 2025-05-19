@@ -13,7 +13,7 @@ import { inference } from '@/inference';
 import { useChatsStore } from '@/stores';
 import { CreateMLCEngine } from '@mlc-ai/web-llm';
 import { LucideArrowUp, LucideStopCircle } from 'lucide-vue-next';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 // === STATE ===
@@ -31,10 +31,7 @@ const router = useRouter();
 const id = computed(() => route.params.id);
 
 // === MODEL OPTIONS ===
-const options = [
-  { value: 'Qwen2-0.5B-Instruct-q0f32-MLC' },
-  { value: 'Llama-3.2-1B-Instruct-q4f32_1-MLC' }
-];
+const options = chatsStore.modelOptions;
 
 let engine: inference.MLCEngine | null = null;
 
@@ -46,6 +43,17 @@ onMounted(() => {
     selectModel(model.value);
   }
 });
+
+watch(
+  () => chatsStore.currentChat,
+  () => {
+    const currentChat = chatsStore.currentChat;
+    if (currentChat) {
+      model.value = currentChat.model;
+      selectModel(model.value);
+    }
+  }
+);
 
 // === FUNCTIONS ===
 const initLLM = async (modelName: string): Promise<void> => {
@@ -148,7 +156,7 @@ const selectModel = (selectedModel: string): void => {
     <div class="w-full px-4">
       <Select
         :model-value="model"
-        :disabled="!!model"
+        :disabled="!!chatsStore.currentChat"
         @update:model-value="(e) => selectModel(e as string)"
       >
         <SelectTrigger class="w-full">
