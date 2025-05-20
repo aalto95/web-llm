@@ -42,7 +42,10 @@ function deleteChat(chatId: string) {
         v-for="modelOption in chatsStore.modelOptions"
         :key="modelOption.value"
       >
-        <SidebarGroupLabel>{{ modelOption.value }}</SidebarGroupLabel>
+        <SidebarGroupLabel
+          v-if="chatsStore.getChatsOfModel(modelOption.value).length"
+          >{{ modelOption.value }}</SidebarGroupLabel
+        >
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem
