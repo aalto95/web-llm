@@ -15,6 +15,7 @@ import { CreateMLCEngine } from '@mlc-ai/web-llm';
 import { LucideArrowUp, LucideStopCircle } from 'lucide-vue-next';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import InfoDialog from './InfoDialog.vue';
 
 // === STATE ===
 const model = ref('');
@@ -194,15 +195,16 @@ const selectModel = (selectedModel: string): void => {
             @keyup.enter="makeQuery"
           />
           <Button v-if="!isQuerying" class="h-12 w-12" @click="makeQuery">
-            <LucideArrowUp></LucideArrowUp>
+            <LucideArrowUp />
           </Button>
           <Button v-else class="h-12 w-12" @click="stopQuery">
-            <LucideStopCircle></LucideStopCircle>
+            <LucideStopCircle />
           </Button>
         </span>
-        <p class="text-center text-xs">
-          AI-generated content may not be accurate.
-        </p>
+        <span class="flex gap-2 justify-center items-center">
+          <p class="text-xs">AI-generated content may not be accurate.</p>
+          <InfoDialog />
+        </span>
       </div>
 
       <!-- Chat Messages -->
