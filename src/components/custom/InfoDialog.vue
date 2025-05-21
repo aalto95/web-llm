@@ -14,7 +14,7 @@ import { InfoIcon } from 'lucide-vue-next';
 
 <template>
   <AlertDialog>
-    <AlertDialogTrigger class="absolute right-4 bottom-2 cursor-pointer">
+    <AlertDialogTrigger class="cursor-pointer">
       <InfoIcon />
     </AlertDialogTrigger>
     <AlertDialogContent>
