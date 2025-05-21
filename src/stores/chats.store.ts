@@ -1,5 +1,9 @@
 import type { Chat } from '@/interfaces';
-import type { ChatCompletionMessageParam } from '@mlc-ai/web-llm';
+import type {
+  ChatCompletionAssistantMessageParam,
+  ChatCompletionMessageParam,
+  ChatCompletionUserMessageParam
+} from '@mlc-ai/web-llm';
 import { defineStore } from 'pinia';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
@@ -43,9 +47,29 @@ export const useChatsStore = defineStore('chats', () => {
     localStorage.setItem('chats', JSON.stringify(chats.value));
   }
 
-  function addMessageToChat(
+  function addAssistantMessageToChat(
     chatId: string,
-    message: ChatCompletionMessageParam
+    message: ChatCompletionAssistantMessageParam
+  ) {
+    chats.value = chats.value.map((chat) => {
+      if (chat.id === chatId) {
+        return {
+          ...chat,
+          messages: [
+            ...chat.messages,
+            { ...message, createdOn: String(new Date()) }
+          ]
+        };
+      }
+      return chat;
+    });
+
+    localStorage.setItem('chats', JSON.stringify(chats.value));
+  }
+
+  function addUserMessageToChat(
+    chatId: string,
+    message: ChatCompletionUserMessageParam
   ) {
     chats.value = chats.value.map((chat) => {
       if (chat.id === chatId) {
@@ -77,6 +101,7 @@ export const useChatsStore = defineStore('chats', () => {
     createChat,
     getChatsOfModel,
     deleteChat,
-    addMessageToChat
+    addAssistantMessageToChat,
+    addUserMessageToChat
   };
 });

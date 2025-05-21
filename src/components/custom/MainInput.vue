@@ -15,6 +15,7 @@ import { CreateMLCEngine } from '@mlc-ai/web-llm';
 import { LucideArrowUp, LucideStopCircle } from 'lucide-vue-next';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import InfoDialog from './InfoDialog.vue';
 
 // === STATE ===
 const model = ref('');
@@ -23,6 +24,7 @@ const isInitializing = ref(true);
 const isQuerying = ref(false);
 const progressText = ref('');
 const chatBox = ref<HTMLDivElement | null>(null);
+const streamAssistantMessage = ref('');
 
 // === STORES & ROUTING ===
 const chatsStore = useChatsStore();
@@ -99,23 +101,32 @@ const makeQuery = async (): Promise<void> => {
       chatsStore.createChat(model.value, userMessage, chatUUID);
       router.push(`/chats/${chatUUID}`);
     } else {
-      chatsStore.addMessageToChat(chatId, userMessage);
+      chatsStore.addUserMessageToChat(chatId, userMessage);
     }
 
     scrollToBottom();
 
     // Get AI response
-    const reply = await engine.chat.completions.create({
-      messages: [userMessage]
+    const chunks = await engine.chat.completions.create({
+      messages: [userMessage],
+      temperature: 1,
+      stream: true,
+      stream_options: { include_usage: true }
     });
 
-    const aiMessage = {
-      role: reply.choices[0].message.role,
-      content: reply.choices[0].message.content ?? 'No response'
-    };
+    for await (const chunk of chunks) {
+      streamAssistantMessage.value += chunk.choices[0]?.delta.content || '';
+      scrollToBottom();
+      if (chunk.usage) {
+        console.log(chunk.usage); // only last chunk has usage
+      }
+    }
 
     // Save AI message
-    chatsStore.addMessageToChat(chatId, aiMessage);
+    chatsStore.addAssistantMessageToChat(chatId, {
+      role: 'assistant',
+      content: streamAssistantMessage.value
+    });
 
     // Reset UI
     query.value = '';
@@ -124,6 +135,7 @@ const makeQuery = async (): Promise<void> => {
     console.error('Error during completion:', error);
   } finally {
     isQuerying.value = false;
+    streamAssistantMessage.value = '';
   }
 };
 
@@ -194,15 +206,16 @@ const selectModel = (selectedModel: string): void => {
             @keyup.enter="makeQuery"
           />
           <Button v-if="!isQuerying" class="h-12 w-12" @click="makeQuery">
-            <LucideArrowUp></LucideArrowUp>
+            <LucideArrowUp />
           </Button>
           <Button v-else class="h-12 w-12" @click="stopQuery">
-            <LucideStopCircle></LucideStopCircle>
+            <LucideStopCircle />
           </Button>
         </span>
-        <p class="text-center text-xs">
-          AI-generated content may not be accurate.
-        </p>
+        <span class="flex gap-2 justify-center items-center">
+          <p class="text-xs">AI-generated content may not be accurate.</p>
+          <InfoDialog />
+        </span>
       </div>
 
       <!-- Chat Messages -->
@@ -240,6 +253,11 @@ const selectModel = (selectedModel: string): void => {
             {{ message.content }}
           </div>
         </template>
+        <div
+          v-if="streamAssistantMessage"
+          class="p-4 rounded-2xl w-fit max-w-[80%] bg-gray-50 dark:bg-gray-900 self-start mr-auto"
+          v-html="streamAssistantMessage"
+        ></div>
       </div>
     </template>
   </div>
