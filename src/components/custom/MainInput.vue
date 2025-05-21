@@ -13,6 +13,8 @@ import { inference } from '@/inference';
 import { useChatsStore } from '@/stores';
 import { CreateMLCEngine } from '@mlc-ai/web-llm';
 import { LucideArrowUp, LucideStopCircle } from 'lucide-vue-next';
+import 'marked';
+import { marked } from 'marked';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import InfoDialog from './InfoDialog.vue';
@@ -249,14 +251,17 @@ const selectModel = (selectedModel: string): void => {
                 ? 'bg-indigo-50 dark:bg-indigo-950 self-end ml-auto'
                 : 'bg-gray-50 dark:bg-gray-900 self-start mr-auto'
             ]"
-          >
-            {{ message.content }}
-          </div>
+            v-html="
+              message.role === 'user'
+                ? message.content
+                : marked.parse(message.content ?? '')
+            "
+          ></div>
         </template>
         <div
           v-if="streamAssistantMessage"
           class="p-4 rounded-2xl w-fit max-w-[80%] bg-gray-50 dark:bg-gray-900 self-start mr-auto"
-          v-html="streamAssistantMessage"
+          v-html="marked.parse(streamAssistantMessage)"
         ></div>
       </div>
     </template>
