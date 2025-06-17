@@ -16,7 +16,7 @@ export const useChatsStore = defineStore('chats', () => {
   const modelOptions = ref([
     { value: 'Qwen2.5-3B-Instruct-q4f16_1-MLC' },
     { value: 'Llama-3.2-3B-Instruct-q4f16_1-MLC' },
-    { value: 'RedPajama-INCITE-Chat-3B-v1-q4f16_1-MLC' },
+    { value: 'Hermes-3-Llama-3.2-3B-q4f16_1-MLC' },
     { value: 'Qwen2-7B-Instruct-q4f16_1-MLC' },
     { value: 'Llama-2-7b-chat-hf-q4f16_1-MLC' },
     { value: 'Mistral-7B-Instruct-v0.3-q4f16_1-MLC' },
