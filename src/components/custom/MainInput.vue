@@ -13,7 +13,6 @@ import { inference } from '@/inference';
 import { useChatsStore } from '@/stores';
 import { CreateMLCEngine } from '@mlc-ai/web-llm';
 import { LucideArrowUp, LucideStopCircle } from 'lucide-vue-next';
-import 'marked';
 import { marked } from 'marked';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -110,7 +109,7 @@ const makeQuery = async (): Promise<void> => {
 
     // Get AI response
     const chunks = await engine.chat.completions.create({
-      messages: [userMessage],
+      messages: [...chatsStore.currentChat?.messages ?? [], userMessage],
       temperature: 1,
       stream: true,
       stream_options: { include_usage: true }
