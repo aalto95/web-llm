@@ -14,8 +14,9 @@ export const useChatsStore = defineStore('chats', () => {
   const chats = ref<Chat[]>([]);
 
   const modelOptions = ref([
-    { value: 'Qwen2-0.5B-Instruct-q0f32-MLC' },
-    { value: 'Llama-3.2-1B-Instruct-q4f32_1-MLC' }
+    { value: 'Qwen2.5-3B-Instruct-q4f16_1-MLC' },
+    { value: 'Llama-3.2-3B-Instruct-q4f16_1-MLC' },
+    { value: 'RedPajama-INCITE-Chat-3B-v1-q4f16_1-MLC-1k' }
   ]);
 
   const currentChat = computed(() =>
