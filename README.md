@@ -38,7 +38,7 @@ Web LLM is a cutting-edge web application that brings the power of Large Languag
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/Enrique-De-La-Cruz/web-llm.git
+   git clone https://github.com/aalto95/web-llm.git
    ```
 2. **Navigate to the project directory**:
    ```bash
@@ -46,14 +46,10 @@ Web LLM is a cutting-edge web application that brings the power of Large Languag
    ```
 3. **Install dependencies**:
    ```bash
-   pnpm install
+   npm ci
    ```
 4. **Run the development server**:
    ```bash
-   pnpm dev
+   npm run dev
    ```
 5. **Open your browser** and navigate to `http://localhost:5173` to see the application in action.
-
-## 📄 License
-
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for more details.
