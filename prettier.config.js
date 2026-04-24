@@ -1,7 +1,7 @@
-import { deepMerge, prettierConfig } from "@config-federation/vue";
+import { deepMerge, prettierConfig } from '@config-federation/vue';
 
 const customRules = {
-	// extend here
+  // extend here
 };
 
 export default deepMerge(prettierConfig, customRules);

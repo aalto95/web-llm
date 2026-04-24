@@ -1,7 +1,7 @@
-import { deepMerge, stylelintConfig } from "@config-federation/vue";
+import { deepMerge, stylelintConfig } from '@config-federation/vue';
 
 const customRules = {
-	// extend here
+  // extend here
 };
 
 export default deepMerge(stylelintConfig, customRules);
