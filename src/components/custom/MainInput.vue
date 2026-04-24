@@ -109,7 +109,7 @@ const makeQuery = async (): Promise<void> => {
 
     // Get AI response
     const chunks = await engine.chat.completions.create({
-      messages: [...chatsStore.currentChat?.messages ?? [], userMessage],
+      messages: [...(chatsStore.currentChat?.messages ?? []), userMessage],
       temperature: 1,
       stream: true,
       stream_options: { include_usage: true }
